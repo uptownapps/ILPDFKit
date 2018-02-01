@@ -187,7 +187,66 @@ static void renderPage(NSUInteger page, CGContextRef ctx, CGPDFDocumentRef doc, 
     }
     UIGraphicsEndPDFContext();
     return pageData;
+}
+
+- (NSData *)mergedDataWithDocuments:(NSArray<ILPDFDocument *>*)docsToAppend {
+    NSMutableData *pageData = [NSMutableData data];
+    UIGraphicsBeginPDFContextToData(pageData, CGRectZero , nil);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    for (NSUInteger page = 1; page <= [self numberOfPages]; page++) {
+        renderPage(page, ctx, _document, self.forms);
+    }
+    for (int docIndex = 0; docIndex < [docsToAppend count]; ++docIndex) {
+        ILPDFDocument *docToAppend = [docsToAppend objectAtIndex:docIndex];
+        for (NSUInteger page = 1; page <= [docToAppend numberOfPages]; page++) {
+            renderPage(page, ctx, docToAppend.document, docToAppend.forms );
+        }
+    }
+    UIGraphicsEndPDFContext();
+    return pageData;
+}
+
+- (ILPDFDocument *)insertingDocument:(ILPDFDocument *)otherDoc afterPageAtIndex:(NSUInteger)index {
+    NSMutableData *pageData = [NSMutableData data];
+    UIGraphicsBeginPDFContextToData(pageData, CGRectZero , nil);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
     
+    NSUInteger page = 1;
+    while (page <= [self numberOfPages]) {
+        renderPage(page, ctx, _document, self.forms);
+        
+        if (page == index) {
+            for (NSUInteger i = 1; i <= [otherDoc numberOfPages]; i++) {
+                renderPage(i, ctx, otherDoc.document, otherDoc.forms );
+            }
+        }
+        
+        ++page;
+    }
+    
+    UIGraphicsEndPDFContext();
+    
+    return [[ILPDFDocument alloc] initWithData:pageData];
+}
+
+- (ILPDFDocument *)movingPagesToEnd:(NSArray<NSNumber*> *)pages {
+    NSMutableData *pageData = [NSMutableData data];
+    UIGraphicsBeginPDFContextToData(pageData, CGRectZero , nil);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    
+    for (NSUInteger page = 1; page <= [self numberOfPages]; page++) {
+        if ([pages containsObject:@(page)]) { continue; }
+        renderPage(page, ctx, _document, self.forms);
+    }
+    
+    for (NSUInteger index = 1; index <= [pages count]; ++index) {
+        NSUInteger page = [pages objectAtIndex:index].unsignedIntegerValue;
+        renderPage(page, ctx, _document, self.forms);
+    }
+    
+    UIGraphicsEndPDFContext();
+    
+    return [[ILPDFDocument alloc] initWithData:pageData];
 }
 
 - (UIImage *)imageFromPage:(NSUInteger)page width:(NSUInteger)width {

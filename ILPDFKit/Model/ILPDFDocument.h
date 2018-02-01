@@ -129,6 +129,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSData *)mergedDataWithDocument:(ILPDFDocument *)docToAppend;
 
 /**
+ @param docsToAppend An array of documents to merge.
+ @return The PDF data of the result when the passed documents are appended to the receiver.
+ */
+- (NSData *)mergedDataWithDocuments:(NSArray<ILPDFDocument *>*)docsToAppend;
+
+
+- (ILPDFDocument *)insertingDocument:(ILPDFDocument *)otherDoc afterPageAtIndex:(NSUInteger)index;
+- (ILPDFDocument *)movingPagesToEnd:(NSArray<NSNumber*> *)pages;
+
+/**
  Converts a PDF page to an image.
  @param page The page number. 1 is the first page.
  @param width The desired width of the returned image. The image will match the aspect ratio of the page.
