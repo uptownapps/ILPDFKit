@@ -239,8 +239,23 @@ static void renderPage(NSUInteger page, CGContextRef ctx, CGPDFDocumentRef doc, 
         renderPage(page, ctx, _document, self.forms);
     }
     
-    for (NSUInteger index = 1; index <= [pages count]; ++index) {
+    for (NSUInteger index = 0; index < [pages count]; ++index) {
         NSUInteger page = [pages objectAtIndex:index].unsignedIntegerValue;
+        renderPage(page, ctx, _document, self.forms);
+    }
+    
+    UIGraphicsEndPDFContext();
+    
+    return [[ILPDFDocument alloc] initWithData:pageData];
+}
+
+- (ILPDFDocument *)renderingPagesWithOrder:(NSArray<NSNumber*> *)order {
+    NSMutableData *pageData = [NSMutableData data];
+    UIGraphicsBeginPDFContextToData(pageData, CGRectZero , nil);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    
+    for (NSUInteger index = 0; index < [order count]; ++index) {
+        NSUInteger page = [order objectAtIndex:index].unsignedIntegerValue;
         renderPage(page, ctx, _document, self.forms);
     }
     

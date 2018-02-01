@@ -137,6 +137,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (ILPDFDocument *)insertingDocument:(ILPDFDocument *)otherDoc afterPageAtIndex:(NSUInteger)index;
 - (ILPDFDocument *)movingPagesToEnd:(NSArray<NSNumber*> *)pages;
+- (ILPDFDocument *)renderingPagesWithOrder:(NSArray<NSNumber*> *)order;
 
 /**
  Converts a PDF page to an image.
